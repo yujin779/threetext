@@ -1,94 +1,52 @@
-import * as THREE from "three";
+window.addEventListener("DOMContentLoaded", init);
 
-class Jumper {
-  constructor() {
-    this.init = this.init.bind(this);
-    this.animate = this.animate.bind(this);
-    this.onWindowResize = this.onWindowResize.bind(this);
+function init() {
+  const width = 960;
+  const height = 540;
 
-    this.init();
+  // レンダラーを作成
+  // レンダラーを作成
+  const renderer = new THREE.WebGLRenderer({
+    canvas: document.querySelector("#app"),
+  });
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setSize(width, height);
 
-    // 灯りを設置
-    this.defaultLigts();
-  }
+  // シーンを作成
+  const scene = new THREE.Scene();
 
-  /**
-   * 灯り
-   */
-  defaultLigts() {
-    const light = new THREE.DirectionalLight(0xffffff, 0.75);
-    light.intensity = 1; // 光の強さ
-    light.position.set(1.5, 3, 2.5);
-    this.scene.add(light);
-    const hemiLight = new THREE.HemisphereLight(0x888888, 0x000000, 1);
-    this.scene.add(hemiLight);
-    const pointLight = new THREE.SpotLight(
-      0xaaaaaa,
-      0.5,
-      0,
-      Math.PI / 4,
-      10,
-      0.5
-    );
-    pointLight.position.set(10, 150, -10);
-    pointLight.castShadow = true;
-    pointLight.shadow.mapSize.width = 2048;
-    pointLight.shadow.mapSize.height = 2048;
-    this.scene.add(pointLight);
-    //座標軸を表示 x=red y=green z=blue
-    // var axis = new THREE.AxesHelper(1000);
-    // this.scene.add(axis);
-  }
+  // カメラを作成
+  const camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
+  camera.position.set(0, 0, +1000);
 
-  /**
-   * 初期設定
-   */
-  init() {
-    this.aspect = window.innerWidth / window.innerHeight;
-    this.camera = new THREE.PerspectiveCamera(50, this.aspect, 1, 130);
-    this.camera.position.set(-15, 12, 30);
-    // this.camera.position.set(-15, 60, 60);
-    // this.camera.position.set(0, 30, 0);
-    this.camera.lookAt(new THREE.Vector3(10, 0, 0));
+  // 箱を作成
+  const geometry = new THREE.BoxGeometry(300, 500, 500);
+  const material = new THREE.MeshStandardMaterial({
+    color: 0x00aaff,
+  });
+  const box = new THREE.Mesh(geometry, material);
+  scene.add(box);
 
-    this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color("#191919");
-    this.canvas = document.querySelector("#app");
-    this.renderer = new THREE.WebGLRenderer({
-      canvas: this.canvas,
-      // powerPreference: "high-performance",
-      antialias: true
-    });
-    this.renderer.shadowMap.enabled = true;
-    // this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+  // 平行光源
+  const directionalLight = new THREE.DirectionalLight(0xffffff);
+  directionalLight.position.set(1, 1, 1);
+  // シーンに追加
+  scene.add(directionalLight);
 
-    document.body.appendChild(this.renderer.domElement);
-    window.addEventListener("resize", this.onWindowResize);
+  // 初回実行
+  renderer.render(scene, camera);
 
-    this.renderer.setPixelRatio(window.devicePixelRatio);
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.render(this.scene, this.camera);
-    this.renderer.setAnimationLoop(this.animate);
-  }
+  // 初回実行
+  tick();
 
-  /**
-   * フレームごとに実行
-   */
-  animate() {
-    // this.controls.update();
-    this.renderer.render(this.scene, this.camera);
-    // console.log?"a")
-  }
+  function tick() {
+    requestAnimationFrame(tick);
 
-  /**
-   * ウィンドウサイズ変更時にcanvasサイズ変更
-   */
-  onWindowResize() {
-    this.camera.aspect = window.innerWidth / window.innerHeight;
-    this.camera.updateProjectionMatrix();
+    // 箱を回転させる
+    box.rotation.x += 0.01;
+    box.rotation.y += 0.01;
 
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    // レンダリング
+    renderer.render(scene, camera);
   }
 }
-
-new Jumper();
