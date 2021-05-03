@@ -1,133 +1,15 @@
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import CANNON from "cannon";
-import Stats from "stats.js";
-import { Player } from "./src/player";
-import { Enemies } from "./src/enemies";
-import { Floor } from "./src/floor";
-import { CannonPhysics } from "./src/cannonPhysics";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { Opening } from "./src/opening";
-import { GameOver } from "./src/gameover";
-
-import dino from "./assets/gltf/dino.glb";
-
-export const SCENE = {
-  Opening: 0,
-  Playing: 1,
-  GameOver: 2,
-};
 
 class Jumper {
   constructor() {
     this.init = this.init.bind(this);
     this.animate = this.animate.bind(this);
     this.onWindowResize = this.onWindowResize.bind(this);
-    this.gameScene = SCENE.Opening;
 
     this.init();
-    this.scoreText = document.getElementById("score");
-    this.score = 0;
-    this.count = 0;
-    this.runningSpeed = 0.15;
+
     // 灯りを設置
     this.defaultLigts();
-    //物理計算
-    this.cannonPhysics = new CannonPhysics(-30);
-    this.jumpPower = 25;
-    //床のオブジェクト
-    this.floor = new Floor(
-      this.scene,
-      this.cannonPhysics,
-      [500, 0.5, 50],
-      [0, 0, 0]
-    );
-    //glTFの読み込み
-    this.loader = new GLTFLoader();
-    //Openingシーン
-    this.opening = new Opening(this.scene, this.camera);
-    //Gameoverシーン
-    this.gameOver = new GameOver(this.scene, this.camera);
-    this.setPlayerObjects();
-    this.enemies = new Enemies(this.scene, this.cannonPhysics);
-    this.score = 0;
-    this.scoreText = document.getElementById("score");
-    this.count = 0;
-    this.runningSpeed = 0.15;
-
-    console.log("player", this.player);
-    // クリック挙動設定
-    this.click = () => {
-      switch (this.gameScene) {
-        case SCENE.Opening:
-          this.opening.toTheNextScene = true;
-          this.opening.background.material.opacity = 0;
-          break;
-        case SCENE.Playing:
-          if (this.player.landing) {
-            this.player.phyBox.applyImpulse(
-              new CANNON.Vec3(0, this.jumpPower, 0),
-              new CANNON.Vec3(0, 0, 0)
-            );
-            this.player.landing = false;
-          }
-          break;
-        case SCENE.GameOver:
-          // console.log("gameover");
-          this.resetData();
-          this.player.toTheNextScene = false;
-          this.gameOver.sceneRemove();
-          this.gameScene = SCENE.Playing;
-          break;
-        default:
-          console.log("scene is default");
-      }
-    };
-    // クリック
-    this.canvas.addEventListener("click", this.click);
-  }
-
-  resetData() {
-    this.score = 0;
-    this.count = 0;
-    this.runningSpeed = 0.2;
-    this.player.initPosition();
-    this.enemies.reset();
-  }
-
-  /**
-   * GLTFLoader
-   */
-  gltfLoad(url) {
-    return new Promise((resolve) => {
-      this.loader.load(url, (data) => {
-        data.scene.traverse(function (node) {
-          if (node.isMesh) {
-            node.castShadow = true;
-          }
-        });
-        resolve(data);
-      });
-    });
-  }
-
-  /**
-   * プレイヤーを設置
-   */
-  setPlayerObjects() {
-    // プレイヤー
-    this.gltfLoad(dino)
-      .then((value) => {
-        this.player = new Player(
-          this.canvas,
-          this.scene,
-          this.cannonPhysics,
-          value
-        );
-      })
-      .catch((error) => {
-        console.error(error);
-      });
   }
 
   /**
@@ -175,16 +57,13 @@ class Jumper {
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas,
       // powerPreference: "high-performance",
-      antialias: true,
+      antialias: true
     });
     this.renderer.shadowMap.enabled = true;
     // this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
     document.body.appendChild(this.renderer.domElement);
     window.addEventListener("resize", this.onWindowResize);
-
-    this.stats = new Stats();
-    document.body.appendChild(this.stats.dom);
 
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -196,44 +75,9 @@ class Jumper {
    * フレームごとに実行
    */
   animate() {
-    this.stats.begin();
-
-    switch (this.gameScene) {
-      case SCENE.Opening:
-        this.opening.tick();
-        if (this.opening.mesh === null) break;
-        if (this.opening.mesh.material.opacity < 0.05) {
-          this.opening.mesh.material.opacity = 0;
-          this.gameScene = SCENE.Playing;
-          this.opening = null;
-        }
-        break;
-      case SCENE.Playing:
-        // console.log("playingnext", this.player.toTheNextScene);
-        if (this.player && this.enemies) {
-          this.cannonPhysics.world.step(1 / (9 / this.runningSpeed));
-          this.count++;
-          if (this.count % 300 === 0) this.runningSpeed += 0.01;
-          this.player.tick();
-          this.score += this.runningSpeed;
-          this.scoreText.innerHTML = "SCORE " + Math.floor(this.score);
-          this.enemies.tick(this.runningSpeed);
-          if (this.player.toTheNextScene) {
-            this.gameScene = SCENE.GameOver;
-            this.gameOver.sceneAdd();
-          }
-        }
-
-        break;
-      case SCENE.GameOver:
-        break;
-      default:
-    }
-
     // this.controls.update();
     this.renderer.render(this.scene, this.camera);
-
-    this.stats.end();
+    // console.log?"a")
   }
 
   /**
