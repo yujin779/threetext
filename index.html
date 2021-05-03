@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>three.js bare example</title>
+    <style>
+      html,
+      body,
+      #root {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+      }
+      div {
+        width: 200px;
+        height: 20px;
+        background: #000;
+        border: 2px solid #000;
+      }
+      div > div {
+        width: 200px;
+        height: 20px;
+        background: red;
+        border: none;
+      }
+      #score {
+        position: absolute;
+        top: -4%;
+        right: 5%;
+        font-family: "arial black";
+        font-size: 3vw;
+        color: #fff;
+      }
+      /* #mainText {
+        position: absolute;
+        top: 40%;
+        right: 40%;
+
+        font-family: "arial black";
+        font-size: 3vw;
+        color: #fff;
+      } */
+    </style>
+  </head>
+  <body>
+    <canvas id="app"></canvas>
+    <p id="score">score 0</p>
+    <script src="./index.js"></script>
+  </body>
+</html>
